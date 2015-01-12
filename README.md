@@ -1,4 +1,4 @@
-﻿# Simple and beautiful Naval Battle web game using Sinatra, ActiveRecord and SQLite.
+﻿A Simple and beautiful Naval Battle web game using Sinatra, ActiveRecord and SQLite.
 
 
 # About the Sinatra App Template

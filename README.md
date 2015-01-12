@@ -1,4 +1,7 @@
-# Sinatra App Template
+﻿# Simple and beautiful Naval Battle web game using Sinatra, ActiveRecord and SQLite.
+
+
+# About the Sinatra App Template
 
 This is a [Sinatra](https://github.com/sinatra/sinatra) application template.
 
@@ -100,3 +103,4 @@ Para ejecutar la aplicación se utiliza el comando `rackup`
 ```bash
 $ bundle exec rackup
 ```
+

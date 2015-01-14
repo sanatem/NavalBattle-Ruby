@@ -16,19 +16,34 @@ class Application < Sinatra::Base
   set :database, YAML.load_file('config/database.yml')[ENV['RACK_ENV']]
 
   get '/' do
-  	erb :login
+  	erb :index
   end
 
   post '/auth/login' do
-   	#User.new(params['user']['username'],params['user']['password'])
+  	username=params['user']['username']
+  	password=params['user']['password']
+  	finded_user=User.find_by(username: username,password:password)
+  	if finded_user
+  		"ESTAS LOGUEADO"
+  	else
+  		"NO EXISTIS PA"
+  	end
+
   end
 
-  get '/users' do
-  	User.create(username:"forrochan")
-  end
+  post '/register' do
+  	username=params['user']['username']
+  	password=params['user']['password']
+  	full_name=params['user']['name']
 
-  get '/register' do
-  	"Registro de usuario"
+  	created_user=User.create(full_name: full_name,username: username,password: password)
+
+  	if created_user.valid?
+  		redirect to :home
+  	else
+  		redirect to '/'
+  	end
+
   end
 end
 

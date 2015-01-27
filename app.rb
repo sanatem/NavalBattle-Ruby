@@ -7,13 +7,32 @@ Dir['./models/**/*.rb'].each {|f| require f }
 
 class Application < Sinatra::Base
 
+  #Configuration
   register Sinatra::ActiveRecordExtension
 
   configure :production, :development do
     enable :logging
   end
 
+  
   set :database, YAML.load_file('config/database.yml')[ENV['RACK_ENV']]
+
+  
+  #Extensions from sinatra 
+  enable :sessions
+
+  #Methods and helpers
+
+  def require_logged_in
+    redirect('/') unless is_authenticated?
+  end
+ 
+  def is_authenticated?
+    return !!session[:user_id]
+  end
+
+
+  #Routes
 
   get '/' do
   	erb :index
@@ -24,13 +43,20 @@ class Application < Sinatra::Base
   	password=params['user']['password']
   	finded_user=User.find_by(username: username,password:password)
   	if finded_user
-  		"ESTAS LOGUEADO"
+      session[:user_id]=finded_user.id
+  		redirect to :home
   	else
-  		"NO EXISTIS PA"
+  		"Username or Password are incorrect"
   	end
 
   end
-
+  
+  get '/logout' do
+    session[:user_id] = nil
+    redirect to '/'
+  end
+  
+  #Register route
   post '/register' do
   	username=params['user']['username']
   	password=params['user']['password']
@@ -43,7 +69,15 @@ class Application < Sinatra::Base
   	else
   		redirect to '/'
   	end
+  end #End register
 
+  #Home route
+  get '/home'  do 
+    require_logged_in
+    erb :home
   end
+  
+
+
 end
 

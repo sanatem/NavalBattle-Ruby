@@ -44,6 +44,7 @@ class Application < Sinatra::Base
   	finded_user=User.find_by(username: username,password:password)
   	if finded_user
       session[:user_id]=finded_user.id
+      session[:user]=finded_user
   		redirect to :home
   	else
   		"Username or Password are incorrect"
@@ -57,15 +58,20 @@ class Application < Sinatra::Base
   end
   
   #Register route
-  post '/register' do
+
+  post '/players' do
   	username=params['user']['username']
   	password=params['user']['password']
   	full_name=params['user']['name']
 
-  	created_user=User.create(full_name: full_name,username: username,password: password)
+  	@user=User.create(full_name: full_name,username: username,password: password)
 
-  	if created_user.valid?
-  		redirect to :home
+  	if @user.valid?
+  		#status 201 => Adjust this for production, agh and an error body
+      #session[:user_id]=created_user.id
+      #redirect to :home => This works but the status code dissappear.
+      status 201
+      body "Created"
   	else
   		redirect to '/'
   	end
@@ -74,9 +80,30 @@ class Application < Sinatra::Base
   #Home route
   get '/home'  do 
     require_logged_in
+    @user=session[:user]
     erb :home
   end
   
+  #List all the players.
+  get '/players' do
+    User.all
+  end  
+
+  get '/players/games/create' do
+    users=User.where.not(id: session[:user_id] )
+    @options=[]
+    users.each do |user|
+      @options << "<option value= #{user.id}> #{user.username}</option>" 
+    end
+    p users
+    erb "game/create".to_sym
+  end
+
+  post '/players/games' do
+    "Has seleccionado: #{params['board']} y tal jugador: #{params['player']}"
+    #@board=Board.create()
+    @game=Game.create( board:params['board'], player_2_id:params['player'], user_id: session[:user_id])
+  end  
 
 
 end

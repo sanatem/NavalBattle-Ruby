@@ -11,11 +11,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150128225906) do
+ActiveRecord::Schema.define(version: 20150128233100) do
+
+  create_table "boards", force: :cascade do |t|
+    t.integer "size"
+    t.integer "max_ships"
+    t.integer "user_id"
+  end
+
+  add_index "boards", ["user_id"], name: "index_boards_on_user_id"
 
   create_table "games", force: :cascade do |t|
     t.integer "user_id"
-    t.string  "board"
+    t.integer "board_id"
     t.integer "player_2_id"
   end
 
@@ -25,7 +33,6 @@ ActiveRecord::Schema.define(version: 20150128225906) do
     t.string "full_name"
     t.string "username"
     t.string "password"
-    t.has_many "games"
   end
 
 end

@@ -78,7 +78,7 @@ class Application < Sinatra::Base
   end #End register
 
   #Home route
-  get '/home'  do 
+  get '/home' do 
     require_logged_in
     @user=session[:user]
     erb :home
@@ -100,11 +100,33 @@ class Application < Sinatra::Base
   end
 
   post '/players/games' do
-    "Has seleccionado: #{params['board']} y tal jugador: #{params['player']}"
-    #@board=Board.create()
-    @game=Game.create( board:params['board'], player_2_id:params['player'], user_id: session[:user_id])
+      "Has seleccionado: #{params['board']} y tal jugador: #{params['player']}"
+      if params['board'].to_i == 5
+        max_ships=7
+      elsif params['board'].to_i == 10
+        max_ships=15
+      else
+        max_ships=20
+      end
+
+      @board=Board.create(size:params['board'].to_i, max_ships: max_ships,user_id: session[:user_id])
+      
+      @game=Game.create( board_id:@board.id, player_2_id:params['player'], user_id: session[:user_id])
+      
+      @user=session[:user]
+
+     erb "game/board".to_sym
+
   end  
 
+
+  put '/players/:id/games/:id_game' do
+    uid=params[:id]
+    gameid=params[:id_game]
+    coor_x= params[:coor_x]
+    coor_y= params[:coor_y]
+    "AGUANTE VIEJAS LOCAS yo soy #{uid} y juego para #{gameid} y recibi: #{coor_x} y coordenada Y: #{coor_y}"
+  end
 
 end
 

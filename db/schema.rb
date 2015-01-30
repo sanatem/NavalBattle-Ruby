@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150128233100) do
+ActiveRecord::Schema.define(version: 20150129210116) do
 
   create_table "boards", force: :cascade do |t|
     t.integer "size"
@@ -28,6 +28,15 @@ ActiveRecord::Schema.define(version: 20150128233100) do
   end
 
   add_index "games", ["user_id"], name: "index_games_on_user_id"
+
+  create_table "ships", force: :cascade do |t|
+    t.boolean "state"
+    t.integer "coorX"
+    t.integer "coorY"
+    t.integer "board_id"
+  end
+
+  add_index "ships", ["board_id"], name: "index_ships_on_board_id"
 
   create_table "users", force: :cascade do |t|
     t.string "full_name"

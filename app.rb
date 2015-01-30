@@ -27,7 +27,7 @@ class Application < Sinatra::Base
   def require_logged_in
     redirect('/') unless is_authenticated?
   end
- 
+  
   def is_authenticated?
     return !!session[:user_id]
   end
@@ -46,10 +46,11 @@ class Application < Sinatra::Base
   	if finded_user
       session[:user_id]=finded_user.id
       session[:user]=finded_user
-  		redirect to :home
-  	else
-  		"Username or Password are incorrect"
-  	end
+      redirect to :home
+    else
+      status 403
+      body "<h1>Error 403 FORBIDDEN</h1>"
+    end
 
   end
   
@@ -64,17 +65,24 @@ class Application < Sinatra::Base
   	username=params['user']['username']
   	password=params['user']['password']
   	full_name=params['user']['name']
-  	@user=User.create(full_name: full_name,username: username,password: password)
-  	if @user.valid?
+    m=username.match(/^[a-zA-Z]+/)
+    if m.nil? then
+      status 400
+      body "<h1>Bad request</h1>"
+    else
+      p m
+      @user=User.create(full_name: full_name,username: username,password: password)
+      if @user.valid?
   		#status 201 => Adjust this for production, agh and an error body
       #session[:user_id]=created_user.id
       #redirect to :home => This works but the status code dissappear.
       status 201
       erb :home
-  	else
-  		status 409
+    else
+      status 409
       body "Error 409 Conflict"
-  	end
+    end
+  end
   end #End register
 
   #Home route
@@ -100,22 +108,22 @@ class Application < Sinatra::Base
   end
 
   post '/players/games' do
-      "Has seleccionado: #{params['board']} y tal jugador: #{params['player']}"
-      if params['board'].to_i == 5
-        max_ships=7
-      elsif params['board'].to_i == 10
-        max_ships=15
-      else
-        max_ships=20
-      end
+    "Has seleccionado: #{params['board']} y tal jugador: #{params['player']}"
+    if params['board'].to_i == 5
+      max_ships=7
+    elsif params['board'].to_i == 10
+      max_ships=15
+    else
+      max_ships=20
+    end
 
-      @board=Board.create(size:params['board'].to_i, max_ships: max_ships,user_id: session[:user_id])
-      
-      @game=Game.create( board_id:@board.id, player_2_id:params['player'], user_id: session[:user_id])
-      
-      @user=session[:user]
+    @board=Board.create(size:params['board'].to_i, max_ships: max_ships,user_id: session[:user_id])
+    
+    @game=Game.create( board_id:@board.id, player_2_id:params['player'], user_id: session[:user_id])
+    
+    @user=session[:user]
 
-     erb "game/board".to_sym
+    erb "game/board".to_sym
 
   end  
 

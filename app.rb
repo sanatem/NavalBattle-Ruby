@@ -1,5 +1,6 @@
 require 'bundler'
-
+require 'thin'
+require 'webrick'
 ENV['RACK_ENV'] ||= 'development'
 Bundler.require :default, ENV['RACK_ENV'].to_sym
 
@@ -63,17 +64,16 @@ class Application < Sinatra::Base
   	username=params['user']['username']
   	password=params['user']['password']
   	full_name=params['user']['name']
-
   	@user=User.create(full_name: full_name,username: username,password: password)
-
   	if @user.valid?
   		#status 201 => Adjust this for production, agh and an error body
       #session[:user_id]=created_user.id
       #redirect to :home => This works but the status code dissappear.
       status 201
-      body "Created"
+      erb :home
   	else
-  		redirect to '/'
+  		status 409
+      body "Error 409 Conflict"
   	end
   end #End register
 

@@ -105,7 +105,7 @@ class Application < Sinatra::Base
   end
 
   post '/players/games' do
-<<<<<<< HEAD
+
       "Has seleccionado: #{params['board']} y tal jugador: #{params['player']}"
       if params['board'].to_i == 5
         max_ships=7

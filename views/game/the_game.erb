@@ -1,0 +1,40 @@
+<h1>Make your move!</h1>
+
+Your Board:
+<br>
+<table border="2">
+	<%for i in (1..@board_1.size) %>
+		<tr>
+			<%for x  in (1..@board_1.size) %>
+				<td>
+					<input type="button" class="btn1" id="<%= i %>,<%= x %>" value="<%= i %> - <%= x %>" onclick="choice(this,'<%= i %>','<%= x %>')" disabled/>
+				</td>
+			<% end %>
+		</tr>
+	<% end %>
+</table>
+<br>
+<br>
+Enemy Board:
+<br>
+<table border="2">
+	<%for i in (1..@board_2.size) %>
+		<tr>
+			<%for x  in (1..@board_2.size) %>
+				<td>
+					<input type="button" class="btn2" id="<%= i %> - <%= x %>" value="<%= i %> - <%= x %>" onclick="choice(this,'<%= i %>','<%= x %>')" />
+				</td>
+			<% end %>
+		</tr>
+	<% end %>
+</table>
+
+
+<script type="text/javascript">
+
+  	<% for ship in @board_1.ships %>
+		document.getElementById(<%=ship.coorX%>+","+<%=ship.coorY%>).value="<=>";
+	 <% end %>
+
+
+</script>

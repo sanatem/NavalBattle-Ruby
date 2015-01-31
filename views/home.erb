@@ -1,11 +1,19 @@
 <h1>Welcome <%= @user.username %> !</h1>
-
+		
 <div>
 	<form method="get" action="/players/games/create">
 		<input type="submit" value="Create Game"/>
 	</form>
-	<button href="#">Join Game</button><br>
+<div>
+<br>	
+	<h1>Active games</h1>
+
+	<% for game in @games %>
+		- <a href="/players/<%= @user.id %>/games/<%= game.id %>"> Game ID n* <%= game.id %>  </a> <br>
+	<% end %>
+</div>
+<br>
+<div>
+	<a href="/logout">Bye bye! Log Out</a>
 
 </div>
-
-<a href="/logout">Log Out</a>

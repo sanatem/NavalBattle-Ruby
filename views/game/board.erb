@@ -36,8 +36,8 @@ LEFT: <input id="left" type="text" value="<%= @board.max_ships %>" disabled/>
 	            url: "/players/<%= @user.id %>/games/<%= @game.id %>",
 	            data: {coor_x: coorX, coor_y: coorY },
 	            success: function (data) {
-	                
 	                input.value="<=>"
+	                alert(data)
 	            }
 	        });
 		}

@@ -44,7 +44,6 @@ class Application < Sinatra::Base
   	finded_user=User.find_by(username: username,password:password)
   	if finded_user
       session[:user_id]=finded_user.id
-      session[:user]=finded_user
   		redirect to :home
   	else
   		"Username or Password are incorrect"
@@ -80,7 +79,7 @@ class Application < Sinatra::Base
   #Home route
   get '/home' do 
     require_logged_in
-    @user=session[:user]
+    @user=User.find(session[:user_id])
     erb :home
   end
   
@@ -110,23 +109,40 @@ class Application < Sinatra::Base
       end
 
       @board=Board.create(size:params['board'].to_i, max_ships: max_ships,user_id: session[:user_id])
-      
+      session[:board_1_id]=@board.id
       @game=Game.create( board_id:@board.id, player_2_id:params['player'], user_id: session[:user_id])
       
-      @user=session[:user]
+      @user=User.find(session[:user_id])
 
      erb "game/board".to_sym
 
   end  
 
-
+  #This update the database with
   put '/players/:id/games/:id_game' do
-    uid=params[:id]
-    gameid=params[:id_game]
-    coor_x= params[:coor_x]
-    coor_y= params[:coor_y]
-    "AGUANTE VIEJAS LOCAS yo soy #{uid} y juego para #{gameid} y recibi: #{coor_x} y coordenada Y: #{coor_y}"
+  
+    @board=Board.find(session[:board_1_id])
+    
+    if @board.ships.size <= @board.max_ships
+
+      uid=params[:id]
+      gameid=params[:id_game]
+      coor_x= params[:coor_x]
+      coor_y= params[:coor_y]
+      @ship=Ship.new(state:true, coorX:coor_x, coorY:coor_y)
+      @board.ships << @ship #This stores the ship into the database and the board.
+      "Agregado Barco (#{@ship.coorX},#{@ship.coorY})"
+    else
+      "NO HAY MAS QUE AGREGAR ACA"
+    end#End if
+  
   end
+
+  post '/players/:id/games/:id_game' do
+
+    "Juego iniciado.."
+
+  end  
 
 end
 

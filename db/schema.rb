@@ -25,6 +25,8 @@ ActiveRecord::Schema.define(version: 20150129210116) do
     t.integer "user_id"
     t.integer "board_id"
     t.integer "player_2_id"
+    t.boolean "finalizado"
+    t.boolean "comenzado"
   end
 
   add_index "games", ["user_id"], name: "index_games_on_user_id"
@@ -43,5 +45,15 @@ ActiveRecord::Schema.define(version: 20150129210116) do
     t.string "username"
     t.string "password"
   end
-
+  create_table "plays", force: :cascade do |t|
+    t.integer "coorX"
+    t.integer "coorY"
+    t.integer "user_id"
+    t.boolean "valid"
+  end
+  add_index "plays", ["board_id"], name: "index_plays_on_board_id"
+  #la idea seria agregar las plays de manera tal que tengan un user_id para saber si la play 
+  #q se ejecuto sobre tal tablero corresponde al usuario contrario  o no , y el valid seria para descartar
+  #las jugadas invalidas
+  #tambien te agrege al game las booleanas que habiamos charlado
 end

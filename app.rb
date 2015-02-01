@@ -213,7 +213,7 @@ class Application < Sinatra::Base
     elsif @game.finished
         ships=Board.find_by(user_id:session[:user_id],game_id:@game.id).alive_ships
       if ships > 0
-        "HAS GANADO ! ! ! "
+        erb "game/winner".to_sym
       else
         "GAME OVER :( "
       end

@@ -12,3 +12,7 @@ group :test do
   gem 'minitest', require: 'minitest/autorun'
   gem 'rack-test'
 end
+
+group :production do
+	gem 'pg'
+end

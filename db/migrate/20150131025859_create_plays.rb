@@ -4,7 +4,7 @@ class CreatePlays < ActiveRecord::Migration
 	  	t.integer :coorX
 	    t.integer :coorY
 	    t.integer :user_id
-	    t.boolean :valid
+	    t.boolean :valid_play
 	    t.belongs_to :board
 	 end
   end

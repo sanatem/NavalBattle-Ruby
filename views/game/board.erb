@@ -36,7 +36,6 @@ LEFT: <input id="left" type="text" value="<%= @board.max_ships %>" disabled/>
 	            data: {coor_x: coorX, coor_y: coorY },
 	            success: function (data) {
 	                input.value="<=>"
-	                alert(data)
 	            }
 	        });
 		}

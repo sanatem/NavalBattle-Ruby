@@ -16,6 +16,7 @@ ActiveRecord::Schema.define(version: 20150131025859) do
   create_table "boards", force: :cascade do |t|
     t.integer "size"
     t.integer "max_ships"
+    t.integer "alive_ships"
     t.integer "game_id"
     t.integer "user_id"
   end
@@ -39,7 +40,7 @@ ActiveRecord::Schema.define(version: 20150131025859) do
     t.integer "coorX"
     t.integer "coorY"
     t.integer "user_id"
-    t.boolean "valid"
+    t.boolean "valid_play"
     t.integer "board_id"
   end
 

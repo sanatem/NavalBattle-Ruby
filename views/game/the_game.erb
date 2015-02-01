@@ -7,7 +7,7 @@ Your Board:
 		<tr>
 			<%for x  in (1..@board_1.size) %>
 				<td>
-					<input type="button" class="btn1" id="<%= i %>,<%= x %>" value="<%= i %> - <%= x %>" onclick="choice(this,'<%= i %>','<%= x %>')" disabled/>
+					<input type="button" class="btn1" id="<%= i %>,<%= x %>" value="<%= i %> - <%= x %>" disabled/>
 				</td>
 			<% end %>
 		</tr>
@@ -17,24 +17,54 @@ Your Board:
 <br>
 Enemy Board:
 <br>
-<table border="2">
-	<%for i in (1..@board_2.size) %>
-		<tr>
-			<%for x  in (1..@board_2.size) %>
-				<td>
-					<input type="button" class="btn2" id="<%= i %> - <%= x %>" value="<%= i %> - <%= x %>" onclick="choice(this,'<%= i %>','<%= x %>')" />
-				</td>
-			<% end %>
-		</tr>
-	<% end %>
-</table>
-
+<form method="POST" action="/players/<%= @user.id %>/games/<%= @game.id %>/move">
+	<table border="2">
+		<%for i in (1..@board_2.size) %>
+			<tr>
+				<%for x  in (1..@board_2.size) %>
+					<td>
+						<input type="submit" name="attack" class="btn2" id="<%= i %> - <%= x %>" value="<%= i %> - <%= x %>" />
+					</td>
+				<% end %>
+			</tr>
+		<% end %>
+	</table>
+	<input type="hidden" value="<%= @board_2.id %>" name="attacked_board"/>
+</form>
 
 <script type="text/javascript">
-
-  	<% for ship in @board_1.ships %>
+	
+	 <% for ship in @board_1.ships %>
 		document.getElementById(<%=ship.coorX%>+","+<%=ship.coorY%>).value="<=>";
+		//else ponemos ***
 	 <% end %>
+
+	<% for play in @board_1.plays %>
+		elem=document.getElementById(<%=play.coorX%>+","+<%=play.coorY%>);
+		if(elem.value=="<=>"){
+			elem.value="OOO";
+		}
+		else{
+			elem.value="XXX";	
+		};
+		
+	<% end %>
+
+	
+	<% for play in @board_2.plays %>
+		elem=document.getElementById(<%=play.coorX%>+" - "+<%=play.coorY%>);
+		elem.value="XXX";
+		elem.disabled=true;	
+	<% end %>
+	
+	<% for ship in @hundidos %>
+		elem=document.getElementById(<%=ship.coorX%>+" - "+<%=ship.coorY%>);
+		if (elem.value == "XXX") {
+			elem.value="OOO";
+			elem.disabled=true;	
+		};
+	
+	<% end %>
 
 
 </script>

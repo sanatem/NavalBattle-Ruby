@@ -1,19 +1,31 @@
+<h1>~ BattleShip: Naval Battle Game ~</h1>
+<br>
 <h1>Welcome <%= @user.username %> !</h1>
-		
+<br>		
 <div>
 	<form method="get" action="/players/games/create">
-		<input type="submit" value="Create Game"/>
+		<input type="submit" value="Create Game" class="submit"/>
 	</form>
-<div>
+</div>
 <br>	
+
+<div class="active">
 	<h1>Active games</h1>
 
-	<% for game in @games %>
-		- <a href="/players/<%= @user.id %>/games/<%= game.id %>"> Game ID n* <%= game.id %>  </a> <br>
+	<% for game in @started %>
+		@ <a href="/players/<%= @user.id %>/games/<%= game.id %>"> Game ID n* <%= game.id %>  </a> @<br><br>
 	<% end %>
 </div>
 <br>
-<div>
+
+<div class="finished">
+	<h1>Finished Games:</h1>
+	<% for finish in @finished %>
+		- <a href="/players/<%= @user.id %>/games/<%= finish.id %>"> Game ID n* <%= finish.id %>  </a> <br><br>
+	<% end %>
+</div>
+
+<div class="bottom">
 	<a href="/logout">Bye bye! Log Out</a>
 
 </div>

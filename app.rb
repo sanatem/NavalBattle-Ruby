@@ -88,6 +88,8 @@ class Application < Sinatra::Base
 
     @user=User.find(session[:user_id])
     @games=Game.where("user_id=#{@user.id} OR player_2_id=#{@user.id}")
+    @started=@games.select{|g| g.finished==false}
+    @finished=@games.select{|g| g.finished==true}
     erb :home
   end
   

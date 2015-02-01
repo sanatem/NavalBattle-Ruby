@@ -1,9 +1,11 @@
-
+<h1>Choose your options before create your game:</h1>
+<br>
 <form method="POST" action="/players/games">
 	<label>Select player:</label>
 	<select name="player">
 		<%= @options %>
 	</select>
+	<br>
 	<br>
 	<label>Select board: </label>
 	<select name="board">
@@ -12,5 +14,6 @@
 		<option value="15">15x15</option>
 	</select>
 	<br>
-	<input type="submit" value="Posicionar barcos"/>
+	<br>
+	<input type="submit" value="Put your Ships" class="submit"/>
 </form>

@@ -1,0 +1,71 @@
+@import url(http://fonts.googleapis.com/css?family=Press+Start+2P);
+
+body{
+font-family: 'Press Start 2P', cursive;
+color:white;
+background-color: black;
+text-align: center;
+}
+
+button, .button, input[type=submit].submit {
+  border: 0;
+  background: #5786c1;
+  color: white;
+  padding: 8px 14px;
+  font-weight: bold;
+  font-size: 20px;
+  text-decoration: none;
+
+  display: inline-block; /* needed for anchors */
+  position: relative;
+	box-shadow: 1px 0px #3a587f, 0px 1px #4171ae,
+              2px 1px #3a587f, 1px 2px #4171ae,
+              3px 2px #3a587f, 2px 3px #4171ae,
+              4px 3px #3a587f, 3px 4px #4171ae,
+              5px 4px #3a587f, 4px 5px #4171ae,
+              6px 5px #3a587f, 5px 6px #4171ae;
+	&:hover, &:focus,
+  &.hover, &.focus {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 0px #3a587f, 0px 1px #4171ae,
+              2px 1px #3a587f, 1px 2px #4171ae,
+              3px 2px #3a587f, 2px 3px #4171ae,
+              4px 3px #3a587f, 3px 4px #4171ae;
+  }
+  &:active,
+  &.active {
+   	transform: translate(4px, 4px);
+    box-shadow: 1px 0px #3a587f, 0px 1px #4171ae,
+              2px 1px #3a587f, 1px 2px #4171ae;
+  }
+}
+
+input[type=text],input[type=password],select,label{
+	font-family: 'Press Start 2P', cursive;
+	padding: 8px 14px;
+	font-size: 18px;
+}
+
+table{
+	margin:auto;
+}
+
+.btn,.btn2,.btn1{
+	font-size: 20px;
+
+}
+
+div.active{
+	float:left;
+	margin-left: 20%;
+}
+
+div.finished{
+	float:right;
+	margin-right: 20%;
+}
+div.bottom{
+	position: fixed;
+    bottom: 10%;
+    width: 100%;
+}

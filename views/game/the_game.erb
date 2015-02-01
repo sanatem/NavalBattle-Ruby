@@ -1,7 +1,7 @@
-<h1>Make your move!</h1>
+<h1>Attack! Make your move!</h1>
 
-Your Board:
-<br>
+<h2>Your Board:</h2>
+<br><br>
 <table border="2">
 	<%for i in (1..@board_1.size) %>
 		<tr>
@@ -14,9 +14,11 @@ Your Board:
 	<% end %>
 </table>
 <br>
+	Alive ships: "<%=@board_2.alive_ships%>"
 <br>
-Enemy Board:
 <br>
+<h2>Enemy Board:</h2>
+<br><br>
 <form method="POST" action="/players/<%= @user.id %>/games/<%= @game.id %>/move">
 	<table border="2">
 		<%for i in (1..@board_2.size) %>
@@ -29,6 +31,8 @@ Enemy Board:
 			</tr>
 		<% end %>
 	</table>
+	<br>
+	>> Enemy's alive ships: "<%=@board_2.alive_ships%>" <<
 	<input type="hidden" value="<%= @board_2.id %>" name="attacked_board"/>
 </form>
 

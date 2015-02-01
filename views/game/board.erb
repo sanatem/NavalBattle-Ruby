@@ -9,14 +9,14 @@ LEFT: <input id="left" type="text" value="<%= @board.max_ships %>" disabled/>
 		<tr>
 			<%for x  in (1..@board.size) %>
 				<td>
-					<input type="button" class="btn" id="<%= i %> - <%= x %>" value="<%= i %> - <%= x %>" onclick="choice(this,'<%= i %>','<%= x %>')" />
+					<input type="button" class="btn" id="<%= i %> - <%= x %>" value="<%= i %> - <%= x %>" onclick="choice(this,'<%= i %>','<%= x %>')"  />
 				</td>
 			<% end %>
 		</tr>
 	<% end %>
 </table>
 
-<input type="submit" value="Start Game ! ! !">
+<input type="submit" value="Start Game ! ! !" class="submit">
 
 
 </form>

@@ -1,6 +1,6 @@
 require 'bundler'
 
-ENV['RACK_ENV'] ||= 'production'
+ENV['RACK_ENV'] ||= 'development'
 Bundler.require :default, ENV['RACK_ENV'].to_sym
 
 Dir['./models/**/*.rb'].each {|f| require f }
@@ -10,7 +10,7 @@ class Application < Sinatra::Base
   #Configuration
   register Sinatra::ActiveRecordExtension
 
-  configure :production, :production do
+  configure :production, :development do
     enable :logging
   end
 

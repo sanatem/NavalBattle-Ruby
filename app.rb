@@ -15,7 +15,7 @@ class Application < Sinatra::Base
   end
 
   
-  set :database, YAML.load_file('config/database.yml')[ENV['RACK_ENV']]
+  set :database, YAML.load(ERB.new(File.read(File.join("config","database.yml"))).result)
 
   
   #Extensions from sinatra 

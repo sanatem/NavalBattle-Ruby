@@ -46,9 +46,7 @@ class Application < Sinatra::Base
       else #I am the player 2
         @board_1=Board.find_by(game_id:params[:id_game],user_id:id2)
         @board_2=Board.find_by(game_id:params[:id_game],user_id:id1)
-
       end
-      
       @hundidos=Ship.where(state:false,board_id:@board_2.id)
 
       erb "game/the_game".to_sym
@@ -205,9 +203,17 @@ class Application < Sinatra::Base
         gameid=params[:id_game]
         coor_x= params[:coor_x]
         coor_y= params[:coor_y]
-        @ship=Ship.new(state:true, coorX:coor_x, coorY:coor_y)
-        @board.ships << @ship #This stores the ship into the database and the board.
-        "Agregado Barco (#{@ship.coorX},#{@ship.coorY})"
+        @exist=Ship.find_by(board_id:@board.id,coorX:coor_x,coorY:coor_y)
+        if (@exist.nil?) 
+          @ship=Ship.new(state:true, coorX:coor_x, coorY:coor_y)
+          @board.ships << @ship #This stores the ship into the database and the board.
+          "Agregado Barco (#{@ship.coorX},#{@ship.coorY})"
+          status 200
+        else
+          status 400
+          body "Bad request"
+          halt
+        end
       else
         "NO HAY MAS QUE AGREGAR ACA"
       end#End if
@@ -248,7 +254,7 @@ class Application < Sinatra::Base
       
       erb "game/board".to_sym
     elsif !@game.started and @game.user_id == @user.id and !@game.finished
-      "EL JUEGO NO HA COMENZADO TODAVÍA.."
+      "EL JUEGO NO HA COMENZADO TODAVIA.."
       
     elsif @game.started and !@game.finished
 
@@ -276,7 +282,6 @@ class Application < Sinatra::Base
       status 201
 
       @board=Board.find(params[:attacked_board])
-
       play=Play.create(coorX:attack[0].to_i,coorY:attack[1].to_i,valid_play:true,user_id:session[:user_id],board_id:@board.id)
        
        #Control de turnos

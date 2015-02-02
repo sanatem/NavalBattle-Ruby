@@ -6,10 +6,16 @@ class RootTest < AppTest
   	def setup
   		@user=User.create(username:"my_test",password:"jodida",full_name:"Lindsdey")
   		@player_2=User.create(username:"my_juanma",password:"jodida",full_name:"Juanma")
-		@board_1=Board.create(size:5, max_ships: 7,user_id: @user.id,alive_ships:7)
-		@board_2=Board.create(size:5, max_ships: 7,user_id: @player_2.id,alive_ships:7)
+		  @board_1=Board.create(size:5, max_ships: 7,user_id:@user.id,alive_ships:7)
+		  @board_2=Board.create(size:5, max_ships: 7,user_id:@player_2.id,alive_ships:7)
   		@game=Game.create( board_1_id:@board_1.id, player_2_id:@player_2.id, user_id: @user.id,
                          id_turno:@player_2.id, started: false , finished: false, board_2_id:@board_2.id )
+      @board_1.game_id=@game.id
+      @board_2.game_id=@game.id
+      @board_2.save
+      @board_1.save
+      @attack="1 - 1"
+
   	
   	end
 
@@ -19,8 +25,9 @@ class RootTest < AppTest
   		Board.where(user_id:@player_2.id).destroy_all
   		User.where(username:"my_test").destroy_all
   		User.where(username:"my_juanma").destroy_all
+      Ship.where(board_id:@board_1.id).destroy_all
+      Play.where(user_id:@player_2_id,board_id:@board_1.id).destroy_all
   	end
-
   	def test_get_root
 	    get '/'
 	    assert_equal 200, last_response.status
@@ -73,20 +80,31 @@ class RootTest < AppTest
 
   def test_ver_partida
   	post '/auth/login', user:{username:@user.username,password:@user.password}
-  	get '/players/@user.id/games/@game.id'
+  	get '/players/@user.id/games/'+@game.id.to_s
   	assert_equal 200, last_response.status 
   end
 
   def test_listar_partidas
-  	get '/players/@user.id/games'
+  	get '/players/'+@user.id.to_s+'/games'
   	assert_equal 200, last_response.status
   end
-
   def test_put_ship
   	post '/auth/login', user:{username:@user.username,password:@user.password}
-  	put '/players/@user.id/games/@game.id'
+    put '/players/'+@user.id.to_s+'/games/'+@game.id.to_s
+    assert_equal 200, last_response.status
   end
-
-
+  def test_put_ship_while_game_started
+      ##ver si lo hacemos porq es largo y da paja
+  end
+  def test_make_a_play_not_my_turn
+    post '/auth/login', user:{username:@user.username,password:@user.password}
+    post '/players/'+@user.id.to_s+'/games/'+@game.id.to_s+'/move', attacked_board: @board_2.id, attack: @attack
+    assert_equal 403, last_response.status
+  end
+  def test_make_a_play_my_turn
+    post '/auth/login', user:{username:@player_2.username,password:@player_2.password}
+    post '/players/'+@player_2.id.to_s+'/games/'+@game.id.to_s+'/move', attacked_board: @board_1.id, attack: @attack
+    assert_equal 201, last_response.status
+  end
  
 end

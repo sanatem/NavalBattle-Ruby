@@ -5,6 +5,7 @@ class RootTest < AppTest
   	
   	def setup
   		@user=User.create(username:"my_test",password:"jodida",full_name:"Lindsdey")
+      @invalid_user=User.create(username:" ",password:"complicada",full_name:"fullnamealgo")
   		@player_2=User.create(username:"my_juanma",password:"jodida",full_name:"Juanma")
 		  @board_1=Board.create(size:5, max_ships: 7,user_id:@user.id,alive_ships:7)
 		  @board_2=Board.create(size:5, max_ships: 7,user_id:@player_2.id,alive_ships:7)
@@ -28,11 +29,16 @@ class RootTest < AppTest
       Ship.where(board_id:@board_1.id).destroy_all
       Play.where(user_id:@player_2_id,board_id:@board_1.id).destroy_all
   	end
-  	def test_get_root
+  	
+    def test_get_root
 	    get '/'
 	    assert_equal 200, last_response.status
   	end
 
+  def test_register_invalid_user
+    post '/players', user: { username:" ",password:"12345",name:"capitancomanche"}
+    assert_equal 400, last_response.status
+  end
 	def test_get_players
 		get '/players'
 		assert_equal 200,last_response.status
@@ -74,8 +80,7 @@ class RootTest < AppTest
   def test_not_create_game
   	post '/auth/login', user:{username:@user.username,password:@user.password}
   	post '/players/@user.id/games', {board:"888", player:@player_2.id}
-  	assert_equal 400, last_response.status  
-  	
+  	assert_equal 400, last_response.status  	
   end
 
   def test_ver_partida
@@ -93,14 +98,13 @@ class RootTest < AppTest
     put '/players/'+@user.id.to_s+'/games/'+@game.id.to_s
     assert_equal 200, last_response.status
   end
-  def test_put_ship_while_game_started
-      ##ver si lo hacemos porq es largo y da paja
-  end
+
   def test_make_a_play_not_my_turn
     post '/auth/login', user:{username:@user.username,password:@user.password}
     post '/players/'+@user.id.to_s+'/games/'+@game.id.to_s+'/move', attacked_board: @board_2.id, attack: @attack
     assert_equal 403, last_response.status
   end
+  
   def test_make_a_play_my_turn
     post '/auth/login', user:{username:@player_2.username,password:@player_2.password}
     post '/players/'+@player_2.id.to_s+'/games/'+@game.id.to_s+'/move', attacked_board: @board_1.id, attack: @attack

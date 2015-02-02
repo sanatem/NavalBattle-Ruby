@@ -267,9 +267,6 @@ class Application < Sinatra::Base
 
   end 
 
- 
-
-
   #Make your move boy!
   post '/players/:id/games/:id_game/move' do
     require_logged_in

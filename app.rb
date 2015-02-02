@@ -31,6 +31,41 @@ class Application < Sinatra::Base
     return !!session[:user_id]
   end
 
+  def load_game id_game,id_user
+     #Reanuda partida
+      #Hallar el player que soy.
+       @user=User.find(id_user)
+       @game=Game.find(id_game)
+       id1=@game.user_id
+       id2=@game.player_2_id
+      if(session[:user_id] == id1)
+        #i am the player 1
+        @board_1=Board.find_by(game_id:params[:id_game],user_id:id1)
+        @board_2=Board.find_by(game_id:params[:id_game],user_id:id2)
+        
+      else #I am the player 2
+        @board_1=Board.find_by(game_id:params[:id_game],user_id:id2)
+        @board_2=Board.find_by(game_id:params[:id_game],user_id:id1)
+
+      end
+      
+      @hundidos=Ship.where(state:false,board_id:@board_2.id)
+
+      erb "game/the_game".to_sym
+  end
+
+
+  def decide_win(id_game)
+
+    ships=Board.find_by(user_id:session[:user_id],game_id:id_game).alive_ships
+    if ships > 0
+      erb "game/winner".to_sym
+    else
+      erb "game/loser".to_sym
+    end
+
+  end   
+
 
   #Routes
 
@@ -69,12 +104,11 @@ class Application < Sinatra::Base
       status 400
       body "<h1>Bad request</h1>"
     else
-      p m
       @user=User.create(full_name: full_name,username: username,password: password)
       if @user.valid?
-        status 201
         session[:user_id]=@user.id
-        redirect to :home
+        status 201
+        "<a href='/home'>Go to home</a>"
       else
         status 409
         body "Error 409 Conflict"
@@ -95,24 +129,33 @@ class Application < Sinatra::Base
   
   #List all the players.
   get '/players' do
-    User.all
+    @players=User.all
+    erb "game/players".to_sym
+  end
+
+  #List all the games
+  get '/players/:id/games' do
+      @games=Game.where("user_id=#{params[:id].to_i} OR player_2_id=#{params[:id].to_i}")
+      @player=User.find(params[:id].to_i)
+      erb "game/games".to_sym
   end  
 
-  #Create the game
+  #Start creating the game
 
   get '/players/games/create' do
+    require_logged_in
     users=User.where.not(id: session[:user_id] )
     @options=[]
     users.each do |user|
       @options << "<option value= #{user.id}> #{user.username}</option>" 
     end
-    p users
+    @id=session[:user_id]
     erb "game/create".to_sym
   end
 
-  post '/players/games' do
-
-      "Has seleccionado: #{params['board']} y tal jugador: #{params['player']}"
+  #Create a Game
+  post '/players/:id/games' do
+    require_logged_in
       if params['board'].to_i == 5
         max_ships=7
       elsif params['board'].to_i == 10
@@ -132,29 +175,41 @@ class Application < Sinatra::Base
 
       @user=User.find(session[:user_id])
 
-     erb "game/board".to_sym
-
+      if @game.valid?
+        status 201
+        erb "game/board".to_sym
+      else
+        status 400
+        "Error 404 Bad Request"   
+      end
   end  
 
   #This update the database with ships
 
   put '/players/:id/games/:id_game' do
+    require_logged_in
+    @game=Game.find(params[:id_game])
+    
+    if(!@game.started)
+      
+      @board=Board.find_by(game_id:params[:id_game],user_id:params[:id])
 
-    @board=Board.find_by(game_id:params[:id_game],user_id:params[:id])
+      if @board.ships.size < @board.max_ships
 
-    if @board.ships.size < @board.max_ships
-
-      uid=params[:id]
-      gameid=params[:id_game]
-      coor_x= params[:coor_x]
-      coor_y= params[:coor_y]
-      @ship=Ship.new(state:true, coorX:coor_x, coorY:coor_y)
-      @board.ships << @ship #This stores the ship into the database and the board.
-      "Agregado Barco (#{@ship.coorX},#{@ship.coorY})"
+        uid=params[:id]
+        gameid=params[:id_game]
+        coor_x= params[:coor_x]
+        coor_y= params[:coor_y]
+        @ship=Ship.new(state:true, coorX:coor_x, coorY:coor_y)
+        @board.ships << @ship #This stores the ship into the database and the board.
+        "Agregado Barco (#{@ship.coorX},#{@ship.coorY})"
+      else
+        "NO HAY MAS QUE AGREGAR ACA"
+      end#End if
     else
-      "NO HAY MAS QUE AGREGAR ACA"
-    end#End if
-  
+      "The game has started . . ."
+    end
+
   end
 
   #Start a game
@@ -191,37 +246,18 @@ class Application < Sinatra::Base
       "EL JUEGO NO HA COMENZADO TODAVÍA.."
       
     elsif @game.started and !@game.finished
-    #Reanuda partida
-      #Hallar el player que soy.
-       id1=@game.user_id
-       id2=@game.player_2_id
-      if(session[:user_id] == id1)
-        #i am the player 1
-        @board_1=Board.find_by(game_id:params[:id_game],user_id:id1)
-        @board_2=Board.find_by(game_id:params[:id_game],user_id:id2)
-        
-      else #I am the player 2
-        @board_1=Board.find_by(game_id:params[:id_game],user_id:id2)
-        @board_2=Board.find_by(game_id:params[:id_game],user_id:id1)
 
-      end
+      load_game(params[:id_game],params[:id])
       
-      @hundidos=Ship.where(state:false,board_id:@board_2.id)
-
-      erb "game/the_game".to_sym
-    
     elsif @game.finished
-        ships=Board.find_by(user_id:session[:user_id],game_id:@game.id).alive_ships
-      if ships > 0
-        erb "game/winner".to_sym
-      else
-        "GAME OVER :( "
-      end
-
+      decide_win(@game.id)
     end
 
 
   end 
+
+ 
+
 
   #Make your move boy!
   post '/players/:id/games/:id_game/move' do
@@ -229,7 +265,11 @@ class Application < Sinatra::Base
 
     attack=params[:attack].split' - ' #This separate the coordenades
     @game=Game.find(params[:id_game])
+    
     if(@game.id_turno == session[:user_id] and !@game.finished) #It's my turn
+      
+      status 201
+
       @board=Board.find(params[:attacked_board])
 
       play=Play.create(coorX:attack[0].to_i,coorY:attack[1].to_i,valid_play:true,user_id:session[:user_id],board_id:@board.id)
@@ -262,10 +302,18 @@ class Application < Sinatra::Base
          end
        end
       
-      redirect to :home
-    else
+      if(!@game.finished)
+        load_game(params[:id_game],params[:id])
+      else
+        decide_win(@game.id)
+      end  
+      
+    elsif @game.id_turno != session[:user_id]
       status 403
       body "<h1>Error 403 FORBIDDEN</h1>"
+    
+    else
+      decide_win(@game.id)
     end
     
   

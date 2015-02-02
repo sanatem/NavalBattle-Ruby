@@ -10,7 +10,7 @@ class Application < Sinatra::Base
   #Configuration
   register Sinatra::ActiveRecordExtension
 
-  configure :production, :development do
+  configure :production, :development, :test do
     enable :logging
   end
 
@@ -88,6 +88,7 @@ class Application < Sinatra::Base
   end
   
   get '/logout' do
+    status 200
     session[:user_id] =session[:board_1_id] =nil
     redirect to '/'
   end
@@ -160,8 +161,12 @@ class Application < Sinatra::Base
         max_ships=7
       elsif params['board'].to_i == 10
         max_ships=15
-      else
+      elsif params['board'].to_i == 15
         max_ships=20
+      else
+        status 400
+        "Error 404 Bad Request" 
+        halt
       end
 
       @board=Board.create(size:params['board'].to_i, max_ships: max_ships,user_id: session[:user_id],alive_ships:max_ships)

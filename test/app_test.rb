@@ -1,39 +1,47 @@
 require 'test_helper'
 
 class RootTest < AppTest
-  	include Rack::Test::Methods
-  	
-  	def setup
-  		@user=User.create(username:"my_test",password:"jodida",full_name:"Lindsdey")
-      @invalid_user=User.create(username:" ",password:"complicada",full_name:"fullnamealgo")
-  		@player_2=User.create(username:"my_juanma",password:"jodida",full_name:"Juanma")
-		  @board_1=Board.create(size:5, max_ships: 7,user_id:@user.id,alive_ships:7)
-		  @board_2=Board.create(size:5, max_ships: 7,user_id:@player_2.id,alive_ships:7)
-  		@game=Game.create( board_1_id:@board_1.id, player_2_id:@player_2.id, user_id: @user.id,
-                         id_turno:@player_2.id, started: false , finished: false, board_2_id:@board_2.id )
-      @board_1.game_id=@game.id
-      @board_2.game_id=@game.id
-      @board_2.save
-      @board_1.save
-      @attack="1 - 1"
+	include Rack::Test::Methods
+	
+	def setup
+		@user=User.create(username:"my_test",password:"jodida",full_name:"Lindsdey")
+    @invalid_user=User.create(username:" ",password:"complicada",full_name:"fullnamealgo")
+		@player_2=User.create(username:"my_juanma",password:"jodida",full_name:"Juanma")
+	  @board_1=Board.create(size:5, max_ships: 7,user_id:@user.id,alive_ships:7)
+	  @board_2=Board.create(size:5, max_ships: 7,user_id:@player_2.id,alive_ships:7)
+    @invalid_board=Board.create(size:6987,max_ships:150,user_id:@player_2.id,alive_ships:150)
+    @invalid_game=Game.create(board_1_id:@board_1.id, player_2_id:@user.id, user_id: @user.id,
+                       id_turno:@user.id, started: true , finished: true, board_2_id:@board_1.id )
+		@game=Game.create( board_1_id:@board_1.id, player_2_id:@player_2.id, user_id: @user.id,
+                       id_turno:@player_2.id, started: false , finished: false, board_2_id:@board_2.id )
+    @board_1.game_id=@game.id
+    @board_2.game_id=@game.id
+    @board_2.save
+    @board_1.save
+    @attack="1 - 1"
 
-  	
-  	end
+	
+	end
 
-  	def teardown
-  		Game.where(user_id:@user.id).destroy_all
-  		Board.where(user_id:@user.id).destroy_all
-  		Board.where(user_id:@player_2.id).destroy_all
-  		User.where(username:"my_test").destroy_all
-  		User.where(username:"my_juanma").destroy_all
-      Ship.where(board_id:@board_1.id).destroy_all
-      Play.where(user_id:@player_2_id,board_id:@board_1.id).destroy_all
-  	end
-  	
-    def test_get_root
-	    get '/'
-	    assert_equal 200, last_response.status
-  	end
+	def teardown
+		Game.where(user_id:@user.id).destroy_all
+		Board.where(user_id:@user.id).destroy_all
+		Board.where(user_id:@player_2.id).destroy_all
+		User.where(username:"my_test").destroy_all
+		User.where(username:"my_juanma").destroy_all
+    Ship.where(board_id:@board_1.id).destroy_all
+    Play.where(user_id:@player_2_id,board_id:@board_1.id).destroy_all
+	end
+  def test_invalid_board
+    assert (@invalid_board.valid?)
+  end	
+  def test_invalid_game
+    assert(@invalid_game.valid?)
+  end
+  def test_get_root
+    get '/'
+    assert_equal 200, last_response.status
+  end
 
   def test_register_invalid_user
     post '/players', user: { username:" ",password:"12345",name:"capitancomanche"}

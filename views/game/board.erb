@@ -2,7 +2,7 @@ PUT YOUR SHIPS HERE: <%= @board.max_ships %>
 <br>
 LEFT: <input id="left" type="text" value="<%= @board.max_ships %>" disabled/>
 <br>
-<form action="/players/<%= @user.id %>/games/<%= @game.id %>" method="post">
+<form action="/players/<%= @user.id %>/games/<%= @game.id %>" method="post" onsubmit="return validate()">
 
 <table border="2">
 	<%for i in (1..@board.size) %>
@@ -45,5 +45,17 @@ LEFT: <input id="left" type="text" value="<%= @board.max_ships %>" disabled/>
 		}
 	}
 
+	function validate(){
+		if (total_marcados > 0 ) {
+			alert("Aun te faltan posicionar barcos");
+			return false;
+		}
+		else{
+			return true;	
+		}
+
+
+		
+	}
 
 </script>

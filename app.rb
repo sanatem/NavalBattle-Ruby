@@ -25,6 +25,8 @@ class Application < Sinatra::Base
 
   #Methods and helpers
 
+  temp_ships=[]
+
   def require_logged_in
     redirect('/') unless is_authenticated?
   end
@@ -55,16 +57,6 @@ class Application < Sinatra::Base
   end
 
 
-  def decide_win(id_game)
-
-    ships=Board.find_by(user_id:session[:user_id],game_id:id_game).alive_ships
-    if ships > 0
-      erb "game/winner".to_sym
-    else
-      erb "game/loser".to_sym
-    end
-
-  end   
 
 
   #Routes
@@ -76,7 +68,7 @@ class Application < Sinatra::Base
   post '/auth/login' do
   	username=params['user']['username']
   	password=params['user']['password']
-  	finded_user=User.find_by(username: username,password:password)
+  	finded_user=User.login(username,password)
   	if finded_user
       session[:user_id]=finded_user.id
       redirect to :home
@@ -144,6 +136,7 @@ class Application < Sinatra::Base
   #Start creating the game
 
   get '/players/games/create' do
+    temp_ships=[]
     require_logged_in
     users=User.where.not(id: session[:user_id] )
     @options=[]
@@ -157,17 +150,15 @@ class Application < Sinatra::Base
   #Create a Game
   post '/players/:id/games' do
     require_logged_in
-      if params['board'].to_i == 5
-        max_ships=7
-      elsif params['board'].to_i == 10
-        max_ships=15
-      elsif params['board'].to_i == 15
-        max_ships=20
-      else
-        status 400
-        "Error 404 Bad Request" 
-        halt
-      end
+
+    board_size=params['board'].to_i
+    max_ships=Board.validate_board (board_size)
+
+    if max_ships.nil?
+      status 400
+      "Error 404 Bad Request" 
+      halt
+    end
 
       @board=Board.create(size:params['board'].to_i, max_ships: max_ships,user_id: session[:user_id],alive_ships:max_ships)
       
@@ -190,7 +181,8 @@ class Application < Sinatra::Base
   end  
 
   #This update the database with ships
-
+  
+  
   put '/players/:id/games/:id_game' do
     require_logged_in
     @game=Game.find(params[:id_game])
@@ -199,7 +191,7 @@ class Application < Sinatra::Base
       
       @board=Board.find_by(game_id:params[:id_game],user_id:params[:id])
 
-      if @board.ships.size < @board.max_ships
+      if temp_ships.size < @board.max_ships
 
         uid=params[:id]
         gameid=params[:id_game]
@@ -207,10 +199,16 @@ class Application < Sinatra::Base
         coor_y= params[:coor_y]
         @exist=Ship.find_by(board_id:@board.id,coorX:coor_x,coorY:coor_y)
         if (@exist.nil?) 
+          
           @ship=Ship.new(state:true, coorX:coor_x, coorY:coor_y)
-          @board.ships << @ship #This stores the ship into the database and the board.
-          "Agregado Barco (#{@ship.coorX},#{@ship.coorY})"
+          temp_ships << @ship #This stores the ship into the database and the board.
+          if temp_ships.size == @board.max_ships
+            @board.ships = temp_ships
+            @board.save
+            temp_ships=[]
+          end  
           status 200
+          #"Agregado Barco (#{@ship.coorX},#{@ship.coorY})"
         else
           status 400
           body "Bad request"
@@ -229,6 +227,8 @@ class Application < Sinatra::Base
   post '/players/:id/games/:id_game' do
 
     game=Game.find(params[:id_game])
+    #validations
+  
     if !game.board_2_id.nil?
       game.started=true
       game.save
@@ -263,7 +263,7 @@ class Application < Sinatra::Base
       load_game(params[:id_game],params[:id])
       
     elsif @game.finished
-      decide_win(@game.id)
+      erb Game.decide_win(@game.id,session[:user_id])
     end
 
 
@@ -314,7 +314,7 @@ class Application < Sinatra::Base
       if(!@game.finished)
         load_game(params[:id_game],params[:id])
       else
-        decide_win(@game.id)
+        erb Game.decide_win(@game.id,session[:user_id])
       end  
       
     elsif @game.id_turno != session[:user_id]
@@ -322,7 +322,7 @@ class Application < Sinatra::Base
       body "<h1>Error 403 FORBIDDEN</h1>"
     
     else
-      decide_win(@game.id)
+      erb Game.decide_win(@game.id,session[:user_id])
     end
     
   

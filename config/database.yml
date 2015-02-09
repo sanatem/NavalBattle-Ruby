@@ -1,18 +1,18 @@
 #For production set adapter to postresql (Heroku)
 development:
-  adapter: postresql
+  adapter: sqlite3
   database: db/naval_db.sqlite3
   pool: 5
   timeout: 5000
 
 test:
-  adapter: postresql
+  adapter: sqlite3
   database: db/naval_db.sqlite3
   pool: 5
   timeout: 5000
 
 production:
-  adapter: postgresql
+  adapter: sqlite3l
   database: db/naval_db.sqlite3
   pool: 5
   timeout: 5000

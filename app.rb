@@ -44,12 +44,12 @@ class Application < Sinatra::Base
        id2=@game.player_2_id
       if(session[:user_id] == id1)
         #i am the player 1
-        @board_1=Board.find_by(game_id:params[:id_game],user_id:id1)
-        @board_2=Board.find_by(game_id:params[:id_game],user_id:id2)
+        @board_1=Board.find_by(game_id:id_game,user_id:id1)
+        @board_2=Board.find_by(game_id:id_game,user_id:id2)
         
       else #I am the player 2
-        @board_1=Board.find_by(game_id:params[:id_game],user_id:id2)
-        @board_2=Board.find_by(game_id:params[:id_game],user_id:id1)
+        @board_1=Board.find_by(game_id:id_game,user_id:id2)
+        @board_2=Board.find_by(game_id:id_game,user_id:id1)
       end
       @hundidos=Ship.where(state:false,board_id:@board_2.id)
 
@@ -154,7 +154,7 @@ class Application < Sinatra::Base
     board_size=params['board'].to_i
     max_ships=Board.validate_board (board_size)
 
-    if max_ships.nil?
+    if max_ships.nil? #Invalid size of board
       status 400
       "Error 404 Bad Request" 
       halt
@@ -188,38 +188,19 @@ class Application < Sinatra::Base
     @game=Game.find(params[:id_game])
     
     if(!@game.started)
-      
       @board=Board.find_by(game_id:params[:id_game],user_id:params[:id])
-
       if temp_ships.size < @board.max_ships
-
-        uid=params[:id]
         gameid=params[:id_game]
-        coor_x= params[:coor_x]
-        coor_y= params[:coor_y]
-        @exist=Ship.find_by(board_id:@board.id,coorX:coor_x,coorY:coor_y)
-        if (@exist.nil?) 
-          
-          @ship=Ship.new(state:true, coorX:coor_x, coorY:coor_y)
-          temp_ships << @ship #This stores the ship into the database and the board.
-          if temp_ships.size == @board.max_ships
-            @board.ships = temp_ships
-            @board.save
-            temp_ships=[]
-          end  
-          status 200
-          #"Agregado Barco (#{@ship.coorX},#{@ship.coorY})"
-        else
-          status 400
-          body "Bad request"
-          halt
-        end
+        @ship=@board.add_ship(temp_ships,params[:coor_x],params[:coor_y])        
+        status 200
       else
-        "NO HAY MAS QUE AGREGAR ACA"
-      end#End if
+        status 400
+        body "Bad request"
+        halt
+      end
     else
-      "The game has started . . ."
-    end
+      "The game has started you can't add more ships . . ."
+    end#End if
 
   end
 
@@ -228,7 +209,7 @@ class Application < Sinatra::Base
 
     game=Game.find(params[:id_game])
     #validations
-  
+
     if !game.board_2_id.nil?
       game.started=true
       game.save
@@ -247,14 +228,10 @@ class Application < Sinatra::Base
 
     if !@game.started and @game.user_id != @user.id and !@game.finished
         
-      board_1=Board.find(@game.board_1_id)
-      
-      @board=Board.create(size:board_1.size, max_ships:board_1.max_ships ,user_id: @user.id,game_id:@game.id,alive_ships:board_1.max_ships)
-      
-      @game.board_2_id=@board.id
-      @game.save #This saves the 2nd player board
+      @board=@game.add_2nd_player(@user.id)
       
       erb "game/board".to_sym
+
     elsif !@game.started and @game.user_id == @user.id and !@game.finished
       "EL JUEGO NO HA COMENZADO TODAVIA.."
       
@@ -274,6 +251,7 @@ class Application < Sinatra::Base
     require_logged_in
 
     attack=params[:attack].split' - ' #This separate the coordenades
+    
     @game=Game.find(params[:id_game])
     
     if(@game.id_turno == session[:user_id] and !@game.finished) #It's my turn
@@ -282,34 +260,12 @@ class Application < Sinatra::Base
 
       @board=Board.find(params[:attacked_board])
       play=Play.create(coorX:attack[0].to_i,coorY:attack[1].to_i,valid_play:true,user_id:session[:user_id],board_id:@board.id)
-       
+      
        #Control de turnos
-       player_1=@game.user_id
-       player_2=@game.player_2_id
-       if(@game.id_turno==player_1)
-          @game.id_turno=player_2
-       else
-          @game.id_turno=player_1
-       end
-       @game.save
-
+       @game.change_turn
        #Control del juego
        #Traer el barco hundido o no
-       ship=Ship.find_by(coorX:play.coorX,coorY:play.coorY,board_id:play.board_id)
-       if !ship.nil? and ship.state!= false
-        #Lo hunde, it hurts :(
-         ship.state=false
-         ship.save
-         #Descontamos el total de barcos vivos
-         board=Board.find(play.board_id)
-         board.alive_ships=board.alive_ships-1
-         board.save
-         if board.alive_ships==0
-           @game.finished=true
-           @game.started=false
-           @game.save
-         end
-       end
+       @game.make_the_play(play)
       
       if(!@game.finished)
         load_game(params[:id_game],params[:id])
@@ -319,15 +275,11 @@ class Application < Sinatra::Base
       
     elsif @game.id_turno != session[:user_id]
       status 403
-      body "<h1>Error 403 FORBIDDEN</h1>"
-    
+      body "<h1>Error 403 FORBIDDEN</h1>"  
     else
       erb Game.decide_win(@game.id,session[:user_id])
     end
-    
-  
   end
 
 
 end
-

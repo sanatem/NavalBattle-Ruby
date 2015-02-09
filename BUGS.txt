@@ -1,0 +1,9 @@
+-que no salte el 403 de mierda
+-tablero cuadrado con letras y numeros por fuera
+-ultimo ataque
+-boton de home cuando finalice la partida
+-seguir atacando cuando hundis uno
+-alerta para cuando es tu turno
+-regla: barcos de 2, de 3, de 4, de 5?
+-reacomodar los barcos (borrar los que pones y cambiarlos de lugar)
+-bug del tramposo (?)

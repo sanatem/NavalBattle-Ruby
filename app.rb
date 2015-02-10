@@ -14,7 +14,7 @@ class Application < Sinatra::Base
     enable :logging
   end
 
-  
+  #For dev:
   set :database, YAML.load_file('config/database.yml')[ENV['RACK_ENV']]
   #For production: 
 
@@ -150,7 +150,7 @@ class Application < Sinatra::Base
   #Create a Game
   post '/players/:id/games' do
     require_logged_in
-
+    temp_ships=[]
     board_size=params['board'].to_i
     max_ships=Board.validate_board (board_size)
 
@@ -162,10 +162,8 @@ class Application < Sinatra::Base
 
       @board=Board.create(size:params['board'].to_i, max_ships: max_ships,user_id: session[:user_id],alive_ships:max_ships)
       
-      
       @game=Game.create( board_1_id:@board.id, player_2_id:params['player'].to_i, user_id: session[:user_id],
                          id_turno:params['player'].to_i, started: false , finished: false )
-      
       @board.game_id=@game.id
       @board.save
 
@@ -189,10 +187,17 @@ class Application < Sinatra::Base
     
     if(!@game.started)
       @board=Board.find_by(game_id:params[:id_game],user_id:params[:id])
+      
       if temp_ships.size < @board.max_ships
         gameid=params[:id_game]
-        @ship=@board.add_ship(temp_ships,params[:coor_x],params[:coor_y])        
-        status 200
+        @ship=@board.add_ship(temp_ships,params[:coor_x].to_i,params[:coor_y].to_i)  
+        if @ship.nil?
+          status 400
+          body "Bad request"
+          halt
+        else    
+          status 200
+        end
       else
         status 400
         body "Bad request"
@@ -209,8 +214,8 @@ class Application < Sinatra::Base
 
     game=Game.find(params[:id_game])
     #validations
-
-    if !game.board_2_id.nil?
+    temp_ships=[]
+    if !game.board_2_id.nil? and game.start_ok
       game.started=true
       game.save
     end
@@ -257,7 +262,6 @@ class Application < Sinatra::Base
     if(@game.id_turno == session[:user_id] and !@game.finished) #It's my turn
       
       status 201
-
       @board=Board.find(params[:attacked_board])
       play=Play.create(coorX:attack[0].to_i,coorY:attack[1].to_i,valid_play:true,user_id:session[:user_id],board_id:@board.id)
       

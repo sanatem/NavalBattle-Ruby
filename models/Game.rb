@@ -1,5 +1,7 @@
 class Game < ActiveRecord::Base
 
+  validates :board_1_id,:player_2_id,:user_id,:id_turno, presence:true
+  
   def self.decide_win(id_game,user_session)
 
     ships=Board.find_by(user_id:user_session,game_id:id_game).alive_ships
@@ -52,7 +54,18 @@ class Game < ActiveRecord::Base
     self.board_2_id=@board.id
     self.save #This saves the 2nd player board  	
   	
-  	@board
+  	@board #Returns the board of the second player
   end
+
+  def start_ok
+    board_1=Board.find(self.board_1_id)
+    board_2=Board.find(self.board_2_id)
+    if board_1.ships.size == board_1.max_ships and board_2.ships.size == board_2.max_ships 
+      true
+    else
+      false
+    end
+  end
+
 
 end

@@ -12,7 +12,7 @@ test:
   timeout: 5000
 
 production:
-  adapter: sqlite3l
+  adapter: sqlite3
   database: db/naval_db.sqlite3
   pool: 5
   timeout: 5000
